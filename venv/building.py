@@ -3,7 +3,7 @@ from datetime import date
 
 class Building:
 
-    def __init__(self, price, address, building_type, year_built=0, floors=0, postal_code='', lot_info='', mls_number=0,
+    def __init__(self, price, link,address, building_type, year_built=0, floors=0, postal_code='', lot_info='', mls_number=0,
                  description='', province='', city=''):
         self.price = price
         self.address = address
@@ -17,3 +17,4 @@ class Building:
         self.date = date.today()
         self.province = province
         self.city = city
+        self.link = link

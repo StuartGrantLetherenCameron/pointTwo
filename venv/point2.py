@@ -6,6 +6,8 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from building import Building
+from pprint import pprint
+from datetime import datetime
 
 
 def main():
@@ -56,11 +58,15 @@ def main():
 
         address = soup.find('div', class_='address-container').text.strip()
 
+
+        address = address.replace('\n','')
+        address = address.replace('\r','')
+
         adress_list = address.split(',')
 
         address = adress_list[0]
 
-        city = adress_list[1]
+        city = adress_list[1].replace(' ','',4)
 
         province = adress_list[2]
 
@@ -97,15 +103,21 @@ def main():
         except:
             description = "not given"
 
+        description = description.replace('Find out more about this property.','')
+        description = description.replace('Request details here','')
+        description = description.strip()
+        province = province.replace(postal_code,'')
+
         building = Building(price=price, address=address, building_type=building_type, year_built=year_built, floors=floors,
-                            postal_code=postal_code, mls_number=mls_number, description=description, city=city, province=province)
+                            postal_code=postal_code, mls_number=mls_number, description=description, city=city, province=province,link=baseUrl + link)
 
         building_list.append(building)
 
     return building_list
 
 
-def export():
+def export(building_list):
+
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
@@ -113,17 +125,21 @@ def export():
 
     client = gspread.authorize(creds)
 
-    sheet = client.open("BIG_DAYTA/big_dayta").sheet1
+    sheet = client.open("bigDayta").sheet1
 
-    print(sheet)
+    data = sheet.get_all_records()
 
-    dataas = sheet.get_all_records()
+    for building in building_list:
 
-    print(dataas)
+        insert_row = [datetime.today().strftime('%Y-%m-%d'), building.postal_code,building.address,building.price,building.province,building.city,building.floors,building.build_type,building.year_built,building.link,"","","","","","","","",building.lot_info,"",building.description]
+        sheet.insert_row(insert_row,2)
+
+
+    #pprint(data)
 
 if __name__ == '__main__':
-    #building_list = main()
-    export()
+    building_list = main()
+    export(building_list)
 
 
 
